@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B-BBEE Level 1 Projection Calculator</title>
+    <style>
+        .bbbee-calculator {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bbbee-calculator h1 { font-size: 24px; color: #333; }
+        .bbbee-calculator h2 { font-size: 20px; color: #444; }
+        .bbbee-calculator h3 { font-size: 18px; color: #555; }
+        .bbbee-calculator h4, h5, h6 { font-size: 16px; color: #666; }
+        .bbbee-calculator p, .bbbee-calculator label, .bbbee-calculator input, .bbbee-calculator select, .bbbee-calculator button {
+            font-size: 14px;
+            color: #333;
+        }
+        .bbbee-calculator input[type="number"], .bbbee-calculator select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .bbbee-calculator button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .bbbee-calculator button:hover {
+            background-color: #45a049;
+        }
+        .bbbee-calculator .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bbbee-calculator">
+        <h1>B-BBEE Level 1 Projection Calculator</h1>
+        <form id="bbbeeForm">
+            <h2>Company Information</h2>
+            <label for="sector">Industry Sector:</label>
+            <select id="sector" required>
+                <option value="">Select a sector</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Construction">Construction</option>
+                <option value="Financial">Financial Services</option>
+                <option value="Forestry">Forestry</option>
+                <option value="ICT">Information and Communication Technology (ICT)</option>
+                <option value="Integrated_Transport">Integrated Transport</option>
+                <option value="Marketing">Marketing, Advertising and Communication</option>
+                <option value="Mining">Mining and Minerals</option>
+                <option value="Property">Property</option>
+                <option value="Tourism">Tourism</option>
+                <option value="Generic">Generic (Other sectors)</option>
+            </select>
+
+            <h2>Ownership</h2>
+            <label for="blackOwnership">Black Ownership (%):</label>
+            <input type="number" id="blackOwnership" min="0" max="100" step="0.01" required>
+
+            <label for="blackWomenOwnership">Black Women Ownership (%):</label>
+            <input type="number" id="blackWomenOwnership" min="0" max="100" step="0.01" required>
+
+            <h2>Management Control</h2>
+            <label for="blackBoardMembers">Black Board Members (%):</label>
+            <input type="number" id="blackBoardMembers" min="0" max="100" step="0.01" required>
+
+            <label for="blackExecutives">Black Executives (%):</label>
+            <input type="number" id="blackExecutives" min="0" max="100" step="0.01" required>
+
+            <h2>Skills Development</h2>
+            <label for="skillsSpend">Skills Development Spend (% of payroll):</label>
+            <input type="number" id="skillsSpend" min="0" max="100" step="0.01" required>
+
+            <h2>Enterprise and Supplier Development</h2>
+            <label for="preferentialProcurement">Preferential Procurement (%):</label>
+            <input type="number" id="preferentialProcurement" min="0" max="100" step="0.01" required>
+
+            <label for="supplierDevelopment">Supplier Development (% of NPAT):</label>
+            <input type="number" id="supplierDevelopment" min="0" max="100" step="0.01" required>
+
+            <h2>Socio-Economic Development</h2>
+            <label for="socioEconomicDevelopment">Socio-Economic Development (% of NPAT):</label>
+            <input type="number" id="socioEconomicDevelopment" min="0" max="100" step="0.01" required>
+
+            <button type="submit">Calculate B-BBEE Score</button>
+        </form>
+
+        <div id="result" class="result" style="display:none;">
+            <h2>B-BBEE Projection Results</h2>
+            <p>Total Score: <span id="totalScore"></span></p>
+            <p>B-BBEE Level: <span id="bbbeeLevel"></span></p>
+            <h3>Recommendations for Improvement:</h3>
+            <ul id="recommendations"></ul>
+        </div>
+    </div>
+
+    <script>
+        const sectorData = {
+            Agriculture: { ownershipPoints: 25, managementPoints: 19, skillsPoints: 20, enterprisePoints: 40, socioEconomicPoints: 5 },
+            Construction: { ownershipPoints: 27, managementPoints: 18, skillsPoints: 21, enterprisePoints: 35, socioEconomicPoints: 5 },
+            Financial: { ownershipPoints: 23, managementPoints: 20, skillsPoints: 20, enterprisePoints: 35, socioEconomicPoints: 5 },
+            Forestry: { ownershipPoints: 25, managementPoints: 19, skillsPoints: 20, enterprisePoints: 40, socioEconomicPoints: 5 },
+            ICT: { ownershipPoints: 25, managementPoints: 23, skillsPoints: 20, enterprisePoints: 50, socioEconomicPoints: 12 },
+            Integrated_Transport: { ownershipPoints: 25, managementPoints: 23, skillsPoints: 20, enterprisePoints: 30, socioEconomicPoints: 5 },
+            Marketing: { ownershipPoints: 27, managementPoints: 23, skillsPoints: 20, enterprisePoints: 43, socioEconomicPoints: 5 },
+            Mining: { ownershipPoints: 25, managementPoints: 19, skillsPoints: 20, enterprisePoints: 40, socioEconomicPoints: 5 },
+            Property: { ownershipPoints: 27, managementPoints: 19, skillsPoints: 20, enterprisePoints: 37, socioEconomicPoints: 5 },
+            Tourism: { ownershipPoints: 27, managementPoints: 19, skillsPoints: 20, enterprisePoints: 40, socioEconomicPoints: 5 },
+            Generic: { ownershipPoints: 25, managementPoints: 19, skillsPoints: 20, enterprisePoints: 40, socioEconomicPoints: 5 }
+        };
+
+        document.getElementById('bbbeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const sector = document.getElementById('sector').value;
+            const blackOwnership = parseFloat(document.getElementById('blackOwnership').value);
+            const blackWomenOwnership = parseFloat(document.getElementById('blackWomenOwnership').value);
+            const blackBoardMembers = parseFloat(document.getElementById('blackBoardMembers').value);
+            const blackExecutives = parseFloat(document.getElementById('blackExecutives').value);
+            const skillsSpend = parseFloat(document.getElementById('skillsSpend').value);
+            const preferentialProcurement = parseFloat(document.getElementById('preferentialProcurement').value);
+            const supplierDevelopment = parseFloat(document.getElementById('supplierDevelopment').value);
+            const socioEconomicDevelopment = parseFloat(document.getElementById('socioEconomicDevelopment').value);
+
+            const sectorPoints = sectorData[sector];
+            let totalScore = 0;
+
+            // Ownership calculation
+            totalScore += (blackOwnership / 100) * sectorPoints.ownershipPoints * 0.7;
+            totalScore += (blackWomenOwnership / 100) * sectorPoints.ownershipPoints * 0.3;
+
+            // Management Control calculation
+            totalScore += (blackBoardMembers / 100) * sectorPoints.managementPoints * 0.5;
+            totalScore += (blackExecutives / 100) * sectorPoints.managementPoints * 0.5;
+
+            // Skills Development calculation
+            totalScore += (skillsSpend / 6) * sectorPoints.skillsPoints; // Assuming 6% is the target
+
+            // Enterprise and Supplier Development calculation
+            totalScore += (preferentialProcurement / 100) * sectorPoints.enterprisePoints * 0.8;
+            totalScore += (supplierDevelopment / 3) * sectorPoints.enterprisePoints * 0.2; // Assuming 3% of NPAT is the target
+
+            // Socio-Economic Development calculation
+            totalScore += (socioEconomicDevelopment / 1) * sectorPoints.socioEconomicPoints; // Assuming 1% of NPAT is the target
+
+            const bbbeeLevel = getBBBEELevel(totalScore);
+
+            document.getElementById('totalScore').textContent = totalScore.toFixed(2);
+            document.getElementById('bbbeeLevel').textContent = bbbeeLevel;
+
+            const recommendations = getRecommendations(totalScore, blackOwnership, blackWomenOwnership, blackBoardMembers, blackExecutives, skillsSpend, preferentialProcurement, supplierDevelopment, socioEconomicDevelopment);
+            const recommendationsList = document.getElementById('recommendations');
+            recommendationsList.innerHTML = '';
+            recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                recommendationsList.appendChild(li);
+            });
+
+            document.getElementById('result').style.display = 'block';
+        });
+
+        function getBBBEELevel(score) {
+            if (score >= 100) return 1;
+            if (score >= 95) return 2;
+            if (score >= 90) return 3;
+            if (score >= 80) return 4;
+            if (score >= 75) return 5;
+            if (score >= 70) return 6;
+            if (score >= 55) return 7;
+            if (score >= 40) return 8;
+            return 'Non-Compliant';
+        }
+
+        function getRecommendations(totalScore, blackOwnership, blackWomenOwnership, blackBoardMembers, blackExecutives, skillsSpend, preferentialProcurement, supplierDevelopment, socioEconomicDevelopment) {
+            const recommendations = [];
+
+            if (blackOwnership < 51) {
+                recommendations.push('Consider increasing Black ownership to at least 51% to maximize points in this category.');
+            }
+            if (blackWomenOwnership < 30) {
+                recommendations.push('Aim to increase Black women ownership to at least 30% for better scoring.');
+            }
+            if (blackBoardMembers < 50 || blackExecutives < 50) {
+                recommendations.push('Strive for at least 50% Black representation in both board members and executives.');
+            }
+            if (skillsSpend < 6) {
+                recommendations.push('Increase skills development spending to at least 6% of payroll to maximize points.');
+            }
+            if (preferentialProcurement < 80) {
+                recommendations.push('Focus on increasing preferential procurement to at least 80% from B-BBEE compliant suppliers.');
+            }
+            if (supplierDevelopment < 3) {
+                recommendations.push('Aim to spend at least 3% of NPAT on supplier development initiatives.');
+            }
+            if (socioEconomicDevelopment < 1) {
+                recommendations.push('Ensure socio-economic development spending reaches at least 1% of NPAT.');
+            }
+
+            return recommendations;
+        }
+    </script>
+</body>
+</html>
